@@ -1,144 +1,172 @@
-import Link from 'next/link'
+'use client'
 
-export default function Home() {
+import { useState, useEffect } from 'react'
+import { createClient } from '../../lib/supabase'
+import { useRouter } from 'next/navigation'
+
+export default function Dashboard() {
+  const [user, setUser] = useState(null)
+  const [activeView, setActiveView] = useState('dashboard')
+  const supabase = createClient()
+  const router = useRouter()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) router.push('/login')
+      else setUser(data.user)
+    })
+  }, [])
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
+  const navItems = [
+    { id: 'dashboard', icon: '⊞', label: 'Tableau de bord' },
+    { id: 'clients', icon: '👥', label: 'Clients' },
+  ]
+
+  if (!user) return null
+
   return (
-    <main style={{
-      minHeight: '100vh',
-      fontFamily: 'Inter, -apple-system, sans-serif',
-      background: '#f5f5f0',
-      color: '#1a1a1a'
-    }}>
-
-      {/* NAV */}
-      <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        background: 'rgba(245,245,240,0.85)', backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(0,0,0,0.07)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 40px', height: '60px'
-      }}>
-        <div style={{ fontSize: '16px', fontWeight: '600' }}>GarageOS</div>
-        <div style={{ display: 'flex', gap: '32px', fontSize: '14px', color: '#5c5c5c' }}>
-          <a href="#features" style={{ textDecoration: 'none', color: 'inherit' }}>Fonctionnalités</a>
-          <a href="#pricing" style={{ textDecoration: 'none', color: 'inherit' }}>Tarifs</a>
-          <a href="#security" style={{ textDecoration: 'none', color: 'inherit' }}>Sécurité</a>
-        </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <Link href="/login" style={{ fontSize: '14px', color: '#5c5c5c', textDecoration: 'none' }}>Se connecter</Link>
-          <Link href="/login" style={{
-            height: '36px', padding: '0 16px', background: '#1a1a1a', color: '#fff',
-            borderRadius: '8px', fontSize: '14px', textDecoration: 'none',
-            display: 'flex', alignItems: 'center'
-          }}>Essai gratuit</Link>
-        </div>
-      </nav>
-
-      {/* HERO */}
-      <section style={{ paddingTop: '140px', paddingBottom: '100px', textAlign: 'center', maxWidth: '800px', margin: '0 auto', padding: '140px 24px 100px' }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '8px',
-          background: '#fff', border: '1px solid rgba(0,0,0,0.09)',
-          borderRadius: '100px', padding: '6px 16px',
-          fontSize: '12px', color: '#2d6a4f', marginBottom: '32px'
-        }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2d6a4f', display: 'inline-block' }}></span>
-          Facturation électronique 2026 incluse
-        </div>
-        <h1 style={{ fontSize: 'clamp(36px, 6vw, 72px)', fontWeight: '600', letterSpacing: '-0.04em', lineHeight: 1.05, marginBottom: '24px' }}>
-          Le logiciel de gestion<br />pour votre garage.
-        </h1>
-        <p style={{ fontSize: '18px', color: '#5c5c5c', fontWeight: '300', lineHeight: 1.65, marginBottom: '40px', maxWidth: '520px', margin: '0 auto 40px' }}>
-          Planning, clients, devis, facturation et stock. Tout ce dont votre atelier a besoin, simplement.
-        </p>
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/login" style={{
-            height: '52px', padding: '0 32px', background: '#1a1a1a', color: '#fff',
-            borderRadius: '12px', fontSize: '15px', fontWeight: '500', textDecoration: 'none',
-            display: 'inline-flex', alignItems: 'center'
-          }}>Démarrer gratuitement →</Link>
-          <a href="#features" style={{
-            height: '52px', padding: '0 32px', background: '#fff', color: '#1a1a1a',
-            border: '1px solid rgba(0,0,0,0.09)', borderRadius: '12px', fontSize: '15px',
-            textDecoration: 'none', display: 'inline-flex', alignItems: 'center'
-          }}>Voir les fonctionnalités</a>
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section id="features" style={{ padding: '80px 40px', maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <h2 style={{ fontSize: '36px', fontWeight: '600', letterSpacing: '-0.03em', marginBottom: '12px' }}>Tout ce dont vous avez besoin</h2>
-          <p style={{ fontSize: '16px', color: '#5c5c5c', fontWeight: '300' }}>Conçu pour les garages français, conforme aux réglementations 2026.</p>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
-          {[
-            { icon: '🔧', title: 'Suivi des interventions', desc: 'Gérez chaque véhicule en temps réel. Vos clients suivent l\'avancement depuis leur téléphone.' },
-            { icon: '📋', title: 'Devis & Facturation', desc: 'Créez des devis professionnels, convertissez-les en factures Factur-X conformes 2026.' },
-            { icon: '📅', title: 'Planning intelligent', desc: 'Organisez votre atelier par mécanicien, visualisez la charge de travail en un coup d\'œil.' },
-            { icon: '📦', title: 'Gestion du stock', desc: 'Alertes automatiques quand vos pièces sont en rupture. Commandes simplifiées.' },
-            { icon: '💬', title: 'Portail client', desc: 'Vos clients suivent leur véhicule, acceptent les devis et vous envoient des messages.' },
-            { icon: '💶', title: 'Tableau de bord finance', desc: 'CA, marges, factures impayées. Tous vos chiffres clés en temps réel.' },
-          ].map((f, i) => (
-            <div key={i} style={{ background: '#fff', borderRadius: '14px', border: '1px solid rgba(0,0,0,0.09)', padding: '28px' }}>
-              <div style={{ fontSize: '28px', marginBottom: '16px' }}>{f.icon}</div>
-              <div style={{ fontSize: '15px', fontWeight: '600', marginBottom: '8px' }}>{f.title}</div>
-              <div style={{ fontSize: '14px', color: '#5c5c5c', lineHeight: 1.6, fontWeight: '300' }}>{f.desc}</div>
+    <div style={{ display: 'flex', height: '100vh', fontFamily: 'Inter, sans-serif', background: '#f5f5f0' }}>
+      <aside style={{ width: '220px', background: '#fff', borderRight: '1px solid rgba(0,0,0,0.07)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '20px', fontSize: '16px', fontWeight: '600', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>GarageOS</div>
+        <nav style={{ flex: 1, padding: '12px 10px' }}>
+          {navItems.map(item => (
+            <div key={item.id} onClick={() => setActiveView(item.id)} style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '9px 12px', borderRadius: '8px', cursor: 'pointer', marginBottom: '2px',
+              background: activeView === item.id ? '#f5f5f0' : 'transparent',
+              fontSize: '13px', color: activeView === item.id ? '#1a1a1a' : '#5c5c5c'
+            }}>
+              <span>{item.icon}</span><span>{item.label}</span>
             </div>
           ))}
+        </nav>
+        <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(0,0,0,0.05)', fontSize: '12px', color: '#9a9a9a' }}>
+          {user.email}
+          <div onClick={handleLogout} style={{ marginTop: '6px', cursor: 'pointer', color: '#991b1b' }}>Déconnexion</div>
         </div>
-      </section>
+      </aside>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <header style={{ height: '56px', background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'flex', alignItems: 'center', padding: '0 24px' }}>
+          <div style={{ fontSize: '15px', fontWeight: '600' }}>{activeView === 'dashboard' ? 'Tableau de bord' : 'Clients'}</div>
+        </header>
+        <main style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+          {activeView === 'dashboard' && <DashboardView />}
+          {activeView === 'clients' && <ClientsView supabase={supabase} />}
+        </main>
+      </div>
+    </div>
+  )
+}
+function DashboardView() {
+  const kpis = [
+    { label: 'Véhicules en cours', value: '12', delta: '+3 aujourd\'hui', color: '#1e3a5f' },
+    { label: 'CA du mois', value: '18 240€', delta: '+12% vs mois dernier', color: '#2d6a4f' },
+    { label: 'Devis en attente', value: '5', delta: '2 expirent bientôt', color: '#92400e' },
+    { label: 'Paiements reçus', value: '3 420€', delta: 'Cette semaine', color: '#1a1a1a' },
+  ]
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      {kpis.map((k, i) => (
+        <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.09)', padding: '20px' }}>
+          <div style={{ fontSize: '11px', color: '#9a9a9a', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k.label}</div>
+          <div style={{ fontSize: '28px', fontWeight: '600', color: k.color, marginBottom: '4px' }}>{k.value}</div>
+          <div style={{ fontSize: '12px', color: '#9a9a9a' }}>{k.delta}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+function ClientsView({ supabase }) {
+  const [clients, setClients] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '' })
 
-      {/* PRICING */}
-      <section id="pricing" style={{ padding: '80px 40px', background: '#fff' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <h2 style={{ fontSize: '36px', fontWeight: '600', letterSpacing: '-0.03em', marginBottom: '12px' }}>Tarifs simples et transparents</h2>
-            <p style={{ fontSize: '16px', color: '#5c5c5c', fontWeight: '300' }}>30 jours gratuits — aucune carte bancaire requise.</p>
+  useEffect(() => { loadClients() }, [])
+
+  async function loadClients() {
+    const { data } = await supabase.from('clients').select('*').order('created_at', { ascending: false })
+    setClients(data || [])
+    setLoading(false)
+  }
+
+  async function handleCreate(e) {
+    e.preventDefault()
+    setSaving(true)
+   const { data: { user } } = await supabase.auth.getUser()
+const { data: userData } = await supabase.from('users').select('garage_id').eq('id', user.id).single()
+await supabase.from('clients').insert({ ...form, garage_id: userData.garage_id })
+    setForm({ first_name: '', last_name: '', email: '', phone: '' })
+    setShowForm(false)
+    await loadClients()
+    setSaving(false)
+  }
+
+  const inp = { width: '100%', height: '44px', border: '1px solid rgba(0,0,0,0.09)', borderRadius: '10px', padding: '0 14px', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }
+  const lbl = { display: 'block', fontSize: '11px', fontWeight: '500', color: '#5c5c5c', marginBottom: '6px' }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+        <button onClick={() => setShowForm(!showForm)} style={{ height: '38px', padding: '0 16px', background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>
+          {showForm ? '✕ Annuler' : '+ Nouveau client'}
+        </button>
+      </div>
+      {showForm && (
+        <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.09)', padding: '24px', marginBottom: '16px' }}>
+          <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '20px' }}>Nouveau client</div>
+          <form onSubmit={handleCreate}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div><label style={lbl}>Prénom *</label><input style={inp} placeholder="Paul" value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} required /></div>
+              <div><label style={lbl}>Nom *</label><input style={inp} placeholder="Dupont" value={form.last_name} onChange={e => setForm({ ...form, last_name: e.target.value })} required /></div>
+              <div><label style={lbl}>Email</label><input style={inp} type="email" placeholder="paul@email.fr" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
+              <div><label style={lbl}>Téléphone</label><input style={inp} placeholder="06 12 34 56 78" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
+            </div>
+            <button type="submit" disabled={saving} style={{ height: '44px', padding: '0 24px', background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', cursor: 'pointer' }}>
+              {saving ? 'Enregistrement...' : 'Enregistrer le client'}
+            </button>
+          </form>
+        </div>
+      )}
+      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.09)', overflow: 'hidden' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: '14px', fontWeight: '600' }}>Clients</div>
+          <span style={{ fontSize: '12px', color: '#9a9a9a' }}>{clients.length} client{clients.length > 1 ? 's' : ''}</span>
+        </div>
+        {loading ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#9a9a9a' }}>Chargement...</div>
+        ) : clients.length === 0 ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#9a9a9a', fontSize: '14px' }}>
+            Aucun client.<br /><span style={{ fontSize: '12px' }}>Cliquez sur "+ Nouveau client" pour commencer.</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
-            {[
-              { name: 'Starter', price: '49', desc: 'Pour les garages solo', features: ['1 utilisateur', 'Clients & véhicules', 'Devis & factures', 'Portail client', 'Support email'], featured: false },
-              { name: 'Pro', price: '129', desc: 'Pour les ateliers en croissance', features: ['5 utilisateurs', 'Tout Starter +', 'Planning avancé', 'Gestion du stock', 'SMS automatiques', 'Support prioritaire'], featured: true },
-              { name: 'Business', price: '249', desc: 'Pour les grands ateliers', features: ['Utilisateurs illimités', 'Tout Pro +', 'Multi-sites', 'API & intégrations', 'Compte dédié'], featured: false },
-            ].map((p, i) => (
-              <div key={i} style={{
-                background: p.featured ? '#1a1a1a' : '#f5f5f0',
-                borderRadius: '16px', padding: '32px',
-                border: p.featured ? 'none' : '1px solid rgba(0,0,0,0.09)',
-                transform: p.featured ? 'scale(1.03)' : 'none'
-              }}>
-                <div style={{ fontSize: '14px', fontWeight: '500', color: p.featured ? 'rgba(255,255,255,0.6)' : '#9a9a9a', marginBottom: '8px' }}>{p.name}</div>
-                <div style={{ fontSize: '42px', fontWeight: '600', letterSpacing: '-0.04em', color: p.featured ? '#fff' : '#1a1a1a', marginBottom: '4px' }}>€{p.price}<span style={{ fontSize: '16px', fontWeight: '300' }}>/mois</span></div>
-                <div style={{ fontSize: '13px', color: p.featured ? 'rgba(255,255,255,0.5)' : '#9a9a9a', marginBottom: '24px' }}>{p.desc}</div>
-                {p.features.map((f, j) => (
-                  <div key={j} style={{ fontSize: '13px', color: p.featured ? 'rgba(255,255,255,0.8)' : '#5c5c5c', marginBottom: '10px', display: 'flex', gap: '8px' }}>
-                    <span style={{ color: p.featured ? '#fff' : '#2d6a4f' }}>✓</span> {f}
-                  </div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: '#fafaf8' }}>
+                {['Nom', 'Email', 'Téléphone', 'Ajouté le'].map(h => (
+                  <th key={h} style={{ padding: '10px 24px', textAlign: 'left', fontSize: '11px', fontWeight: '500', color: '#9a9a9a', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>{h}</th>
                 ))}
-                <Link href="/login" style={{
-                  display: 'block', textAlign: 'center', marginTop: '24px',
-                  height: '44px', lineHeight: '44px', borderRadius: '10px',
-                  background: p.featured ? '#fff' : '#1a1a1a',
-                  color: p.featured ? '#1a1a1a' : '#fff',
-                  textDecoration: 'none', fontSize: '14px', fontWeight: '500'
-                }}>Démarrer →</Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer style={{ padding: '40px', textAlign: 'center', borderTop: '1px solid rgba(0,0,0,0.07)', color: '#9a9a9a', fontSize: '13px' }}>
-        <div style={{ marginBottom: '16px', fontWeight: '600', color: '#1a1a1a' }}>GarageOS</div>
-        <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '16px' }}>
-          {['Mentions légales', 'CGU', 'Confidentialité', 'RGPD'].map(l => (
-            <a key={l} href="#" style={{ color: '#9a9a9a', textDecoration: 'none' }}>{l}</a>
-          ))}
-        </div>
-        © 2026 GarageOS — Hébergé en France 🇫🇷
-      </footer>
-
-    </main>
+              </tr>
+            </thead>
+            <tbody>
+              {clients.map(c => (
+                <tr key={c.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                  <td style={{ padding: '14px 24px', fontSize: '13px', fontWeight: '500' }}>{c.first_name} {c.last_name}</td>
+                  <td style={{ padding: '14px 24px', fontSize: '13px', color: '#5c5c5c' }}>{c.email || '—'}</td>
+                  <td style={{ padding: '14px 24px', fontSize: '13px', color: '#5c5c5c' }}>{c.phone || '—'}</td>
+                  <td style={{ padding: '14px 24px', fontSize: '13px', color: '#9a9a9a' }}>{new Date(c.created_at).toLocaleDateString('fr-FR')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
   )
 }
